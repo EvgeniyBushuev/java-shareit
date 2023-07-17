@@ -13,7 +13,6 @@ import ru.practicum.shareit.user.storage.UserStorage;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
