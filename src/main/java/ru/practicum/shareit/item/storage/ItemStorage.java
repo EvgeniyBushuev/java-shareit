@@ -12,7 +12,7 @@ public interface ItemStorage {
 
     Item updateItem(Long itemId, Long userId, Item itemUpdate);
 
-    Collection<Item> getAll();
+    Collection<Item> getByOwnerId(Long ownerId);
 
     Collection<Item> searchByText(String text);
 }

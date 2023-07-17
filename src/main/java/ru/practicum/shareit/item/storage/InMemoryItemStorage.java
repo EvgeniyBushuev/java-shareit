@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.storage;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.BadRequestException;
-import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -34,14 +33,15 @@ public class InMemoryItemStorage implements ItemStorage {
             throw new BadRequestException("Некоректный индентификатор запроса: " + itemId);
         }
 
-        checkOwner(userId, item);
         updateItemInfo(item, itemUpdate);
         return item;
     }
 
     @Override
-    public Collection<Item> getAll() {
-        return items.values();
+    public Collection<Item> getByOwnerId(Long ownerId) {
+        return items.values().stream()
+                .filter(item -> item.getOwner().getId().equals(ownerId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -49,12 +49,11 @@ public class InMemoryItemStorage implements ItemStorage {
 
         if (text == null || text.isEmpty()) return List.of();
 
-        String lowerCaseText = text.toLowerCase();
-
-        return items.values().stream()
-                .filter(item -> item.getAvailable() &&
-                        (item.getName().toLowerCase().contains(lowerCaseText) ||
-                                item.getDescription().toLowerCase().contains(lowerCaseText)))
+        return items.values()
+                .stream()
+                .filter(Item::getAvailable)
+                .filter(item -> item.getName().toLowerCase().contains(text.toLowerCase())
+                        || item.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .collect(Collectors.toList());
     }
 
@@ -67,12 +66,6 @@ public class InMemoryItemStorage implements ItemStorage {
         }
         if (itemUpdate.getAvailable() != null) {
             item.setAvailable(itemUpdate.getAvailable());
-        }
-    }
-
-    private void checkOwner(Long userId, Item item) {
-        if (!Objects.equals(item.getOwner().getId(), userId)) {
-            throw new NotFoundException("Попытка обновить элемент другого пользователя");
         }
     }
 }

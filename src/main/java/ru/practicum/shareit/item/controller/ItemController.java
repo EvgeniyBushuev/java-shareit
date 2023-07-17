@@ -2,22 +2,20 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
 
 import javax.validation.Valid;
 import java.util.Collection;
 
 @Slf4j
-@Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
 public class ItemController {
 
-    private final ItemService itemService;
+    private final ItemServiceImpl itemService;
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto,
@@ -27,10 +25,10 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto exchangeItem(@PathVariable Long itemId,
+    public ItemDto updateItem(@PathVariable Long itemId,
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @Valid @RequestBody ItemDto itemDto) {
-        log.info("Запрос на обмен вещи {}", itemDto);
+            @RequestBody ItemDto itemDto) {
+        log.info("Запрос на обновление вещи {}", itemDto);
         return itemService.updateItem(itemId, userId, itemDto);
     }
 

@@ -25,7 +25,6 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User update(User user, Long userId) {
-        checkUserExists(userId);
         checkUserEmail(user.getEmail(), userId);
         User userUpdate = users.get(userId);
 
