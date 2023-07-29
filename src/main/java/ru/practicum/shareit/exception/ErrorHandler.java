@@ -21,11 +21,16 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler(InvalidDataException.class)
+    @ExceptionHandler({InvalidDataException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserDataConflictException(final InvalidDataException e) {
+    public ErrorResponse handleUserDataConflictException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());
     }
 
-
+    @ExceptionHandler({UnsupportedStateException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleMethodArgumentTypeMismatchException(
+            final RuntimeException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 }
