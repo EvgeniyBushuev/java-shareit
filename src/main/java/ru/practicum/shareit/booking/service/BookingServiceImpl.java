@@ -1,10 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
@@ -35,7 +33,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingResponseDto getById(Long bookingId, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(()-> new NotFoundException("Бронь не найдена"));
+                .orElseThrow(() -> new NotFoundException("Бронь не найдена"));
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
@@ -153,7 +151,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDto approve(Long bookingId, boolean approved, Long userId) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(()-> new NotFoundException("Бронь не найдена"));
+                .orElseThrow(() -> new NotFoundException("Бронь не найдена"));
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
