@@ -70,6 +70,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ItemDto addItem(@Valid ItemDto itemDto, Long userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
@@ -95,7 +96,7 @@ public class ItemServiceImpl implements ItemService {
             try {
                 return ItemMapper.toDto(itemRepository.save(item));
             } catch (DataIntegrityViolationException e) {
-                throw new InvalidDataException("Ошибка валидации данных");
+                throw new InvalidDataException("Ошибка целостности данных");
             }
         } else {
             throw new BadRequestException("Некорректное значение для обновления");
@@ -125,7 +126,7 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = CommentMapper.fromDto(commentDto);
 
-        if (bookingRepository.findAllApprovedByItemIdAndUserId(itemId, userId, LocalDateTime.now()).isEmpty()) {
+        if (bookingRepository.findAllApprovedByItemIdAndUserId(itemId, userId, LocalDateTime.now()) == 0) {
             throw new BadRequestException("Комментирование доступно после аренды");
         }
 

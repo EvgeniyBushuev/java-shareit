@@ -42,11 +42,11 @@ public class UserServiceImpl implements UserService {
         Optional.ofNullable(userDto.getName()).ifPresent(stored::setName);
         Optional.ofNullable(userDto.getEmail()).ifPresent(stored::setEmail);
 
-            try {
-                return UserMapper.toDto(userRepository.save(stored));
-            } catch (DataIntegrityViolationException e) {
-                throw new InvalidDataException("Ошибка валидации данных");
-            }
+        try {
+            return UserMapper.toDto(userRepository.save(stored));
+        } catch (DataIntegrityViolationException e) {
+            throw new InvalidDataException("Ошибка целостности данных");
+        }
     }
 
     @Override

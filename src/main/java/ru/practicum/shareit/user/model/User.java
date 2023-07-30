@@ -9,10 +9,10 @@ import javax.persistence.*;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id")
     private Long id;
-    @Column(name = "name")
+    @Column(name = "user_name")
     private String name;
     @Column(name = "email", unique = true)
     private String email;

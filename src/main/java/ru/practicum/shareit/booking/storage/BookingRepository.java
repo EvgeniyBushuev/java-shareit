@@ -38,9 +38,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByItemId(Long itemId);
 
-    @Query("select b from Booking b where b.item.id = :itemId and b.user.id = :userId and b"
+    @Query("select count(b) from Booking b where b.item.id = :itemId and b.user.id = :userId and b"
             + ".status = ru.practicum.shareit.booking.model.BookingStatus.APPROVED and b.end < "
             + ":currentTime")
-    List<Booking> findAllApprovedByItemIdAndUserId(Long itemId, Long userId,
+    Integer findAllApprovedByItemIdAndUserId(Long itemId, Long userId,
             LocalDateTime currentTime);
 }
