@@ -17,6 +17,4 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "and i.available = true ")
     List<Item> findBySearchText(String searchText);
 
-    @Query("Тут вообще фигня какая то получсется")
-    List<Item> findAllByOwnerIdWithBookingsAndComments(Long ownerId, LocalDateTime now);
 }
