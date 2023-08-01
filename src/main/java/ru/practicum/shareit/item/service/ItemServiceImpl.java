@@ -59,12 +59,15 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public List<ItemDto> getItemsByUserId(Long userId) {
+
         return itemRepository.findAllByOwnerId(userId).stream()
                 .map(ItemMapper::toDto)
                 .map(this::addBookingInfo)
                 .map(this::addComments)
                 .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(Collectors.toList());
+
+
     }
 
     @Override
@@ -126,7 +129,7 @@ public class ItemServiceImpl implements ItemService {
 
         Comment comment = CommentMapper.fromDto(commentDto);
 
-        if (bookingRepository.findAllApprovedByItemIdAndUserId(itemId, userId, LocalDateTime.now()) == 0) {
+        if (bookingRepository.findCountAllApprovedByItemIdAndUserId(itemId, userId, LocalDateTime.now()) == 0) {
             throw new BadRequestException("Комментирование доступно после аренды");
         }
 
@@ -140,14 +143,16 @@ public class ItemServiceImpl implements ItemService {
     private ItemDto addBookingInfo(ItemDto itemDto) {
         List<Booking> bookings = bookingRepository.findAllByItemId(itemDto.getId());
 
+        LocalDateTime now = LocalDateTime.now();
+
         Booking nextBooking = bookings.stream()
-                .filter(booking -> booking.getStart().isAfter(LocalDateTime.now()))
+                .filter(booking -> booking.getStart().isAfter(now))
                 .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED))
                 .min(Comparator.comparing(Booking::getStart))
                 .orElse(null);
 
         Booking lastBooking = bookings.stream()
-                .filter(booking -> booking.getStart().isBefore(LocalDateTime.now()))
+                .filter(booking -> booking.getStart().isBefore(now))
                 .max(Comparator.comparing(Booking::getEnd))
                 .orElse(null);
 

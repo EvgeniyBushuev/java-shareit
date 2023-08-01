@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -15,4 +16,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "or upper(i.description) like upper(concat('%', ?1, '%')) " +
             "and i.available = true ")
     List<Item> findBySearchText(String searchText);
+
+    @Query("Тут вообще фигня какая то получсется")
+    List<Item> findAllByOwnerIdWithBookingsAndComments(Long ownerId, LocalDateTime now);
 }
