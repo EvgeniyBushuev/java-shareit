@@ -3,16 +3,17 @@ package ru.practicum.shareit.item.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
-@Slf4j
-@RequiredArgsConstructor
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
+@Slf4j
 public class ItemController {
 
     private final ItemService itemService;
@@ -33,20 +34,30 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemInfo(@PathVariable Long itemId) {
-        log.info("Запрос информации о вещи с id = {}", itemId);
-        return itemService.getItem(itemId);
+    public ItemDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long itemId) {
+        log.info("Запрос вещи ID: {}", itemId);
+        return itemService.getItem(itemId, userId);
     }
 
     @GetMapping
-    public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("Запрос списка всех вещей пользователя с id {}", userId);
+    public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Запрос списка вещей пользователя ID: {}", userId);
         return itemService.getItemsByUserId(userId);
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItems(@RequestParam String text) {
+    public List<ItemDto> searchItems(@RequestParam String text) {
         log.info("Поисковыый запрос {}", text);
         return itemService.searchItemsForRent(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@PathVariable Long itemId,
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Valid @RequestBody CommentDto commentDto) {
+        log.info("Запрос на создание комментария к вещи ID: {}, от пользователя ID: {} ",
+                itemId, userId);
+        return itemService.createComment(commentDto, userId, itemId);
     }
 }

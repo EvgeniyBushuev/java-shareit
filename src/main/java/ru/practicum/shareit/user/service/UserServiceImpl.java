@@ -1,43 +1,73 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.InvalidDataException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.storage.UserRepository;
 
-import java.util.Collection;
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
+    @Override
+    @Transactional
     public UserDto addUser(UserDto userDto) {
-        return UserMapper.toUserDto(userStorage.add(UserMapper.toUser(userDto)));
+        User user = UserMapper.fromDto(userDto);
+        try {
+            return UserMapper.toDto(userRepository.save(user));
+        } catch (Exception e) {
+            throw new InvalidDataException("Email занят");
+        }
     }
 
+    @Override
+    @Transactional
     public UserDto updateUser(UserDto userDto, Long userId) {
-        userStorage.getById(userId).orElseThrow(() -> new BadRequestException("Некорректный "
-                + "идентификатор пользователя"));
-        return UserMapper.toUserDto(userStorage.update(UserMapper.toUser(userDto), userId));
+
+        User stored = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Некорректный идентификатор: " + userId));
+
+        Optional.ofNullable(userDto.getName()).ifPresent(stored::setName);
+        Optional.ofNullable(userDto.getEmail()).ifPresent(stored::setEmail);
+
+        try {
+            return UserMapper.toDto(userRepository.save(stored));
+        } catch (DataIntegrityViolationException e) {
+            throw new InvalidDataException("Ошибка целостности данных");
+        }
     }
 
-    public Collection<UserDto> getAllUsers() {
-        return userStorage.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+    @Override
+    @Transactional
+    public List<UserDto> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserMapper::toDto)
+                .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
     public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(userStorage.getById(userId)
-                .orElseThrow(() -> new InvalidDataException("Некорректный идентификатор "
-                        + "пользователя " + userId)));
+        return UserMapper.toDto(userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Некорректный идентификатор: " + userId)));
     }
 
+    @Override
+    @Transactional
     public void deleteUserById(Long userId) {
-        userStorage.deleteById(userId);
+        userRepository.deleteById(userId);
     }
 }

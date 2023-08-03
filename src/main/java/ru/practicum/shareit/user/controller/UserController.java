@@ -7,19 +7,18 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Collection;
+import java.util.List;
 
 @RestController
-@Slf4j
-@RequiredArgsConstructor
 @RequestMapping(path = "/users")
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping
-    public UserDto createUser(@Valid @RequestBody UserDto userDto) {
-
+    public UserDto addUser(@Valid @RequestBody UserDto userDto) {
         log.info("Запрос на добавление пользователя");
         return userService.addUser(userDto);
     }
@@ -32,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<UserDto> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         log.info("Запрос на получение списка пользователей");
         return userService.getAllUsers();
     }
