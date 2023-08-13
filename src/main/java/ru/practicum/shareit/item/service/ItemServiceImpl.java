@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -18,6 +20,8 @@ import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
@@ -37,9 +41,10 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public ItemDto getItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь не найдена"));
@@ -57,10 +62,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
-    public List<ItemDto> getItemsByUserId(Long userId) {
+    @Transactional(readOnly = true)
+    public List<ItemDto> getItemsByUserId(Long userId, int from, int size) {
 
-        return itemRepository.findAllByOwnerId(userId).stream()
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        return itemRepository.findAllByOwnerId(userId, pageable).stream()
                 .map(ItemMapper::toDto)
                 .map(this::addBookingInfo)
                 .map(this::addComments)
@@ -79,6 +86,13 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = ItemMapper.fromDto(itemDto);
         item.setOwner(user);
+
+        if (itemDto.getRequestId() != null) {
+            ItemRequest itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException("Запросов на данную вещь не найдено"));
+
+            item.setItemRequest(itemRequest);
+        }
 
         return ItemMapper.toDto(itemRepository.save(item));
     }
@@ -108,11 +122,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> searchItemsForRent(String text) {
+    public List<ItemDto> searchItemsForRent(String text, int from, int size) {
+
+        Pageable pageable = PageRequest.of(from / size, size);
+
         if (text.isBlank()) {
             return List.of();
         } else {
-            return itemRepository.findBySearchText(text).stream()
+            return itemRepository.findBySearchText(text, pageable).stream()
                     .map(ItemMapper::toDto)
                     .collect(Collectors.toList());
         }

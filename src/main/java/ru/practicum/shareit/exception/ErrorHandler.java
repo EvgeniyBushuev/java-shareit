@@ -26,11 +26,4 @@ public class ErrorHandler {
     public ErrorResponse handleUserDataConflictException(final RuntimeException e) {
         return new ErrorResponse(e.getMessage());
     }
-
-    @ExceptionHandler({UnsupportedStateException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleMethodArgumentTypeMismatchException(
-            final RuntimeException e) {
-        return new ErrorResponse(e.getMessage());
-    }
 }

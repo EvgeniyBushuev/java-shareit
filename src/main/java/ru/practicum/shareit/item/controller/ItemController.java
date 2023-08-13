@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -41,15 +42,19 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                         @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
+                                         @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
         log.info("Запрос списка вещей пользователя ID: {}", userId);
-        return itemService.getItemsByUserId(userId);
+        return itemService.getItemsByUserId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestParam String text) {
+    public List<ItemDto> searchItems(@RequestParam String text,
+                                     @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
+                                     @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
         log.info("Поисковыый запрос {}", text);
-        return itemService.searchItemsForRent(text);
+        return itemService.searchItemsForRent(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

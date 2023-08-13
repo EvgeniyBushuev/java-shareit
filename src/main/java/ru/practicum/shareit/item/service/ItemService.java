@@ -10,11 +10,11 @@ public interface ItemService {
 
     ItemDto getItem(Long itemId, Long userId);
 
-    List<ItemDto> getItemsByUserId(Long userId);
+    List<ItemDto> getItemsByUserId(Long userId, int from, int size);
 
     ItemDto updateItem(Long itemId, Long userId, ItemDto itemDto);
 
-    List<ItemDto> searchItemsForRent(String text);
+    List<ItemDto> searchItemsForRent(String text, int from, int size);
 
     CommentDto createComment(CommentDto commentDto, Long userId, Long itemId);
 }
