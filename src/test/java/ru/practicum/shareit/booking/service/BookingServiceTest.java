@@ -75,21 +75,21 @@ public class BookingServiceTest {
     void getByIdTest_UserIsNotOwner() {
         User owner = getUser(1L);
         User booker = getUser(2L);
-        User NotOwner = getUser(3L);
+        User notOwner = getUser(3L);
 
         Item item = getItem(10L, owner);
 
         Booking booking = getBooking(100L, booker, item);
 
         when(bookingRepository.findById(eq(booking.getId()))).thenReturn(Optional.ofNullable(booking));
-        when(userRepository.findById(eq(NotOwner.getId()))).thenReturn(Optional.ofNullable(NotOwner));
+        when(userRepository.findById(eq(notOwner.getId()))).thenReturn(Optional.ofNullable(notOwner));
 
         NotFoundException e = assertThrows(NotFoundException.class, () -> {
-            bookingService.getById(booking.getId(), NotOwner.getId());
+            bookingService.getById(booking.getId(), notOwner.getId());
         });
 
         verify(bookingRepository, times(1)).findById(eq(booking.getId()));
-        verify(userRepository, times(1)).findById(eq(NotOwner.getId()));
+        verify(userRepository, times(1)).findById(eq(notOwner.getId()));
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository);
     }
 
