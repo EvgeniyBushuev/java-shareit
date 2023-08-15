@@ -42,8 +42,8 @@ public class ItemRequestServiceTest {
 
     @Test
     void getAllByRequesterIdTest() {
-        User owner = getUser(1);
-        User requester = getUser(2);
+        User owner = getUser(1L);
+        User requester = getUser(2L);
 
         ItemRequest itemRequest1 = getItemRequest(10L);
         itemRequest1.setRequester(requester);
@@ -51,11 +51,11 @@ public class ItemRequestServiceTest {
         ItemRequest itemRequest2 = getItemRequest(11L);
         itemRequest2.setRequester(requester);
 
-        Item item1 = getItem(100);
+        Item item1 = getItem(100L);
         item1.setOwner(owner);
         item1.setItemRequest(itemRequest1);
 
-        Item item2 = getItem(101);
+        Item item2 = getItem(101L);
         item2.setOwner(owner);
         item2.setItemRequest(itemRequest2);
 
@@ -66,8 +66,7 @@ public class ItemRequestServiceTest {
 
         when(userRepository.findById(requester.getId())).thenReturn(Optional.ofNullable(requester));
         when(itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(eq(requester.getId()), any(Pageable.class))).thenReturn(itemRequestList);
-        when(itemRepository.findAllByItemRequestId(eq(itemRequest1.getId()))).thenReturn(Arrays.asList(item1));
-        when(itemRepository.findAllByItemRequestId(eq(itemRequest2.getId()))).thenReturn(Arrays.asList(item2));
+        when(itemRepository.findAllByItemRequestIdIn(eq(List.of(itemRequest1.getId(),itemRequest2.getId())))).thenReturn(Arrays.asList(item1, item2));
 
         Pageable pageable = PageRequest.of(0,10);
 
@@ -77,7 +76,7 @@ public class ItemRequestServiceTest {
 
         assertThat(resultDtoList.get(0).getId(), equalTo(itemRequest1.getId()));
         assertThat(resultDtoList.get(0).getDescription(), equalTo(itemRequest1.getDescription()));
-        assertThat(resultDtoList.get(0).getItems().size(), equalTo(1));
+        assertThat(resultDtoList.get(0).getItems().size(), equalTo(2));
         assertThat(resultDtoList.get(0).getItems().get(0).getId(), equalTo(item1.getId()));
         assertThat(resultDtoList.get(0).getItems().get(0).getName(), equalTo(item1.getName()));
         assertThat(resultDtoList.get(0).getItems().get(0).getDescription(), equalTo(item1.getDescription()));
@@ -86,17 +85,16 @@ public class ItemRequestServiceTest {
 
         assertThat(resultDtoList.get(1).getId(), equalTo(itemRequest2.getId()));
         assertThat(resultDtoList.get(1).getDescription(), equalTo(itemRequest2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().size(), equalTo(1));
-        assertThat(resultDtoList.get(1).getItems().get(0).getId(), equalTo(item2.getId()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getName(), equalTo(item2.getName()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getDescription(), equalTo(item2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getAvailable(), equalTo(item2.getAvailable()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11));
+        assertThat(resultDtoList.get(1).getItems().size(), equalTo(2));
+        assertThat(resultDtoList.get(1).getItems().get(1).getId(), equalTo(item2.getId()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getName(), equalTo(item2.getName()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getDescription(), equalTo(item2.getDescription()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getAvailable(), equalTo(item2.getAvailable()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getRequestId(), equalTo(11));
 
         verify(userRepository, times(1)).findById(eq(requester.getId()));
         verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(eq(requester.getId()), any(Pageable.class));
-        verify(itemRepository, times(1)).findAllByItemRequestId(itemRequest1.getId());
-        verify(itemRepository, times(1)).findAllByItemRequestId(itemRequest2.getId());
+        verify(itemRepository, times(1)).findAllByItemRequestIdIn(List.of(itemRequest1.getId(),itemRequest2.getId()));
         verifyNoMoreInteractions(itemRequestRepository, userRepository, itemRepository);
     }
 

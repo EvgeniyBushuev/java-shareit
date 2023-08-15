@@ -54,12 +54,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         }
 
         return responseItemRequests;
-
-        /*return itemRequestRepository
-                .findAllByRequesterIdOrderByCreatedDesc(userId, pageable).stream()
-                .map(ItemRequestMapper::toGetResponseDto)
-                .map(this::addItemsInfo)
-                .collect(Collectors.toList());*/
     }
 
     @Override

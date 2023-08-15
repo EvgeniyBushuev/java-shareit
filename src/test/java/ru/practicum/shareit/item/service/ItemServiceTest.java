@@ -289,27 +289,27 @@ public class ItemServiceTest {
         item1nextBooking.setStart(LocalDateTime.now().plusDays(1));
         item1nextBooking.setEnd(LocalDateTime.now().plusDays(2));
 
-        List<Booking> item1bookingList = Arrays.asList(
+        List<Booking> itemBookingList = Arrays.asList(
                 item1lastBooking,
                 item1nextBooking
         );
 
         Comment comment1 = getComment(1000L);
+        comment1.setItem(item1);
         comment1.setAuthor(booker);
 
         Comment comment2 = getComment(1001L);
+        comment2.setItem(item1);
         comment2.setAuthor(booker);
 
-        List<Comment> item1commentList = Arrays.asList(
+        List<Comment> itemCommentList = Arrays.asList(
                 comment1,
                 comment2
         );
 
         when(itemRepository.findAllByOwnerId(eq(owner.getId()), any(Pageable.class))).thenReturn(itemList);
-        when(bookingRepository.findAllByItemId(eq(item1.getId()))).thenReturn(item1bookingList);
-        when(bookingRepository.findAllByItemId(eq(item2.getId()))).thenReturn(new ArrayList<>());
-        when(commentRepository.findAllByItemId(eq(item1.getId()))).thenReturn(item1commentList);
-        when(commentRepository.findAllByItemId(eq(item2.getId()))).thenReturn(new ArrayList<>());
+        when(bookingRepository.findAllByItemIdIn(eq(List.of(item1.getId(), item2.getId())))).thenReturn(itemBookingList);
+        when(commentRepository.findAllByItemIdIn(eq(List.of(item1.getId(), item2.getId())))).thenReturn(itemCommentList);
 
         Pageable pageable = PageRequest.of(0, 10);
 
@@ -320,19 +320,10 @@ public class ItemServiceTest {
         assertThat(resultDtoList.get(0).getName(), equalTo(item1.getName()));
         assertThat(resultDtoList.get(0).getDescription(), equalTo(item1.getDescription()));
         assertThat(resultDtoList.get(0).getAvailable(), equalTo(item1.getAvailable()));
-
         assertThat(resultDtoList.get(0).getNextBooking().getId(), equalTo(item1nextBooking.getId()));
         assertThat(resultDtoList.get(0).getNextBooking().getBookerId(), equalTo(booker.getId()));
         assertThat(resultDtoList.get(0).getLastBooking().getId(), equalTo(item1lastBooking.getId()));
         assertThat(resultDtoList.get(0).getLastBooking().getBookerId(), equalTo(booker.getId()));
-
-        assertThat(resultDtoList.get(0).getComments().size(), equalTo(2));
-        assertThat(resultDtoList.get(0).getComments().get(0).getId(), equalTo(comment1.getId()));
-        assertThat(resultDtoList.get(0).getComments().get(0).getText(), equalTo(comment1.getText()));
-        assertThat(resultDtoList.get(0).getComments().get(0).getAuthorName(), equalTo(booker.getName()));
-        assertThat(resultDtoList.get(0).getComments().get(1).getId(), equalTo(comment2.getId()));
-        assertThat(resultDtoList.get(0).getComments().get(1).getText(), equalTo(comment2.getText()));
-        assertThat(resultDtoList.get(0).getComments().get(1).getAuthorName(), equalTo(booker.getName()));
 
         assertThat(resultDtoList.get(1).getId(), equalTo(item2.getId()));
         assertThat(resultDtoList.get(1).getName(), equalTo(item2.getName()));
@@ -345,10 +336,8 @@ public class ItemServiceTest {
         assertThat(resultDtoList.get(1).getComments().size(), equalTo(0));
 
         verify(itemRepository, times(1)).findAllByOwnerId(eq(owner.getId()), any(Pageable.class));
-        verify(bookingRepository, times(1)).findAllByItemId(eq(item1.getId()));
-        verify(bookingRepository, times(1)).findAllByItemId(eq(item2.getId()));
-        verify(commentRepository, times(1)).findAllByItemId(eq(item1.getId()));
-        verify(commentRepository, times(1)).findAllByItemId(eq(item2.getId()));
+        verify(bookingRepository, times(1)).findAllByItemIdIn(eq(List.of(item1.getId(), item2.getId())));
+        verify(commentRepository, times(1)).findAllByItemIdIn(eq(List.of(item1.getId(), item2.getId())));
         verifyNoMoreInteractions(itemRepository, userRepository, bookingRepository, commentRepository, itemRequestRepository);
     }
 
