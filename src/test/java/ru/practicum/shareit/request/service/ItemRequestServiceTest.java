@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
@@ -68,7 +69,9 @@ public class ItemRequestServiceTest {
         when(itemRepository.findAllByItemRequestId(eq(itemRequest1.getId()))).thenReturn(Arrays.asList(item1));
         when(itemRepository.findAllByItemRequestId(eq(itemRequest2.getId()))).thenReturn(Arrays.asList(item2));
 
-        List<ItemRequestGetResponseDto> resultDtoList = itemRequestService.getAllByRequesterId(requester.getId(), 0, 10);
+        Pageable pageable = PageRequest.of(0,10);
+
+        List<ItemRequestGetResponseDto> resultDtoList = itemRequestService.getAllByRequesterId(requester.getId(), pageable);
 
         assertThat(resultDtoList.size(), equalTo(2));
 
@@ -125,7 +128,9 @@ public class ItemRequestServiceTest {
         when(itemRepository.findAllByItemRequestId(eq(itemRequest1.getId()))).thenReturn(Arrays.asList(item1));
         when(itemRepository.findAllByItemRequestId(eq(itemRequest2.getId()))).thenReturn(Arrays.asList(item2));
 
-        List<ItemRequestGetResponseDto> resultDtoList = itemRequestService.getAll(owner.getId(), 0, 10);
+        Pageable pageable = PageRequest.of(0,10);
+
+        List<ItemRequestGetResponseDto> resultDtoList = itemRequestService.getAll(owner.getId(), pageable);
 
         assertThat(resultDtoList.size(), equalTo(2));
 

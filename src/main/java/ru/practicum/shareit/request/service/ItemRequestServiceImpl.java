@@ -1,7 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -30,23 +30,43 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemRequestGetResponseDto> getAllByRequesterId(Long userId, int from, int size) {
+    public List<ItemRequestGetResponseDto> getAllByRequesterId(Long userId, Pageable pageable) {
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Некорректный идентификатор: " + userId));
 
-        return itemRequestRepository
-                .findAllByRequesterIdOrderByCreatedDesc(userId, PageRequest.of(from / size, size)).stream()
+        List<ItemRequest> requests = itemRequestRepository
+                .findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
+
+        List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
+                .stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList()));
+
+        List<ItemRequestGetResponseDto> responseItemRequests = new ArrayList<>();
+
+        for (ItemRequest request : requests) {
+            ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(request);
+
+            addItemsInformation(itemResponse, items);
+
+            responseItemRequests.add(itemResponse);
+        }
+
+        return responseItemRequests;
+
+        /*return itemRequestRepository
+                .findAllByRequesterIdOrderByCreatedDesc(userId, pageable).stream()
                 .map(ItemRequestMapper::toGetResponseDto)
                 .map(this::addItemsInfo)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemRequestGetResponseDto> getAll(Long userId, int from, int size) {
+    public List<ItemRequestGetResponseDto> getAll(Long userId, Pageable pageable) {
         return itemRequestRepository
-                .findAllByRequesterIdNotOrderByCreatedDesc(userId, PageRequest.of(from / size, size)).stream()
+                .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable).stream()
                 .map(ItemRequestMapper::toGetResponseDto)
                 .map(this::addItemsInfo)
                 .collect(Collectors.toList());
@@ -55,7 +75,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional(readOnly = true)
     public ItemRequestGetResponseDto getById(Long userId, Long itemRequestId) {
-       // ServiceUtil.getUserOrThrowNotFound(userId, userRepository);
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Некорректный идентификатор: " + userId));
@@ -82,6 +101,25 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     private ItemRequestGetResponseDto addItemsInfo(ItemRequestGetResponseDto itemRequestGetResponseDto) {
         List<Item> items = itemRepository.findAllByItemRequestId(itemRequestGetResponseDto.getId());
+
+        itemRequestGetResponseDto.setItems(items.isEmpty() ? new ArrayList<>() :
+                items.stream()
+                        .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
+                                .id(item.getId())
+                                .name(item.getName())
+                                .description(item.getDescription())
+                                .available(item.getAvailable())
+                                .requestId(Math.toIntExact(item.getItemRequest().getId()))
+                                .build()
+                        )
+                        .collect(Collectors.toList())
+        );
+
+        return itemRequestGetResponseDto;
+    }
+
+    private ItemRequestGetResponseDto addItemsInformation(ItemRequestGetResponseDto itemRequestGetResponseDto, List<Item> items) {
+       // List<Item> items = itemRepository.findAllByItemRequestId(itemRequestGetResponseDto.getId());
 
         itemRequestGetResponseDto.setItems(items.isEmpty() ? new ArrayList<>() :
                 items.stream()

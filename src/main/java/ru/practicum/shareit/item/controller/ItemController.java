@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -45,16 +47,22 @@ public class ItemController {
     public List<ItemDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
                                          @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
+
+        Pageable pageable = PageRequest.of(from / size, size);
+
         log.info("Запрос списка вещей пользователя ID: {}", userId);
-        return itemService.getItemsByUserId(userId, from, size);
+        return itemService.getItemsByUserId(userId, pageable);
     }
 
     @GetMapping("/search")
     public List<ItemDto> searchItems(@RequestParam String text,
                                      @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
                                      @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
+
+        Pageable pageable = PageRequest.of(from / size, size);
+
         log.info("Поисковыый запрос {}", text);
-        return itemService.searchItemsForRent(text, from, size);
+        return itemService.searchItemsForRent(text, pageable);
     }
 
     @PostMapping("/{itemId}/comment")

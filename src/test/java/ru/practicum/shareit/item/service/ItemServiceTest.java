@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -310,7 +311,9 @@ public class ItemServiceTest {
         when(commentRepository.findAllByItemId(eq(item1.getId()))).thenReturn(item1commentList);
         when(commentRepository.findAllByItemId(eq(item2.getId()))).thenReturn(new ArrayList<>());
 
-        List<ItemDto> resultDtoList = itemService.getItemsByUserId(owner.getId(), 0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<ItemDto> resultDtoList = itemService.getItemsByUserId(owner.getId(), pageable);
 
         assertThat(resultDtoList.size(), equalTo(2));
         assertThat(resultDtoList.get(0).getId(), equalTo(item1.getId()));
@@ -363,7 +366,9 @@ public class ItemServiceTest {
 
         when(itemRepository.findBySearchText(eq(searchText), any(Pageable.class))).thenReturn(itemList);
 
-        List<ItemDto> resultDtoList = itemService.searchItemsForRent(searchText, 0, 10);
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<ItemDto> resultDtoList = itemService.searchItemsForRent(searchText, pageable);
 
         assertThat(resultDtoList.size(), equalTo(2));
 
@@ -383,7 +388,10 @@ public class ItemServiceTest {
 
     @Test
     void getAllBySearchTextTest_BlankQuery() {
-        List<ItemDto> resultDtoList = itemService.searchItemsForRent(" ", 0, 10);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        List<ItemDto> resultDtoList = itemService.searchItemsForRent(" ", pageable);
 
         assertThat(resultDtoList.size(), equalTo(0));
 

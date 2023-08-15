@@ -59,7 +59,7 @@ public class BookingController {
 
         RequestBookingState requestBookingState;
 
-        Pageable pageable = PageRequest.of(from / size, size);;
+        Pageable pageable = PageRequest.of(from / size, size);
 
         try {
             requestBookingState = RequestBookingState.valueOf(state.toUpperCase());

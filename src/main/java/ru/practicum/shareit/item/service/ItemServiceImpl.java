@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,18 +62,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> getItemsByUserId(Long userId, int from, int size) {
+    public List<ItemDto> getItemsByUserId(Long userId, Pageable pageable) {
 
-        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
 
-        return itemRepository.findAllByOwnerId(userId, pageable).stream()
-                .map(ItemMapper::toDto)
-                .map(this::addBookingInfo)
-                .map(this::addComments)
-                .sorted(Comparator.comparing(ItemDto::getId))
-                .collect(Collectors.toList());
+        List<Long> itemsId = items.stream().map(Item::getId).collect(Collectors.toList());
 
+        List<Booking> itemBookings = bookingRepository.findAllByItemIdIn(itemsId);
 
+        List<Comment> itemComments = commentRepository.findAllByItemIdIn(itemsId);
+
+        List<ItemDto> fullItemDto = new ArrayList<>();
+
+        for (Item item : items) {
+
+            ItemDto itemDto = ItemMapper.toDto(item);
+
+            addBookings(itemDto, itemBookings);
+
+            addItemComments(itemDto, itemComments);
+
+            fullItemDto.add(itemDto);
+        }
+
+        return fullItemDto;
     }
 
     @Override
@@ -122,9 +133,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> searchItemsForRent(String text, int from, int size) {
-
-        Pageable pageable = PageRequest.of(from / size, size);
+    public List<ItemDto> searchItemsForRent(String text, Pageable pageable) {
 
         if (text.isBlank()) {
             return List.of();
@@ -157,18 +166,22 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toDto(commentRepository.save(comment));
     }
 
-    private ItemDto addBookingInfo(ItemDto itemDto) {
-        List<Booking> bookings = bookingRepository.findAllByItemId(itemDto.getId());
+    private ItemDto addBookings(ItemDto itemDto, List<Booking> bookings) {
+
+        List<Booking> bookingsByItem = bookings
+                .stream()
+                .filter(booking -> booking.getItem().getId().equals(itemDto.getId()))
+                .collect(Collectors.toList());
 
         LocalDateTime now = LocalDateTime.now();
 
-        Booking nextBooking = bookings.stream()
+        Booking nextBooking = bookingsByItem.stream()
                 .filter(booking -> booking.getStart().isAfter(now))
                 .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED))
                 .min(Comparator.comparing(Booking::getStart))
                 .orElse(null);
 
-        Booking lastBooking = bookings.stream()
+        Booking lastBooking = bookingsByItem.stream()
                 .filter(booking -> booking.getStart().isBefore(now))
                 .max(Comparator.comparing(Booking::getEnd))
                 .orElse(null);
@@ -182,6 +195,45 @@ public class ItemServiceImpl implements ItemService {
                 .id(lastBooking.getId())
                 .bookerId(lastBooking.getUser().getId())
                 .build() : null);
+
+        return itemDto;
+    }
+
+    private ItemDto addBookingInfo(ItemDto itemDto) {
+        List<Booking> bookings = bookingRepository.findAllByItemId(itemDto.getId());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Booking nextBooking = bookings.stream()
+                .filter(booking -> booking.getStart().isAfter(now))
+                .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED))
+                .min(Comparator.comparing(Booking::getStart))
+                .orElse(null);
+        Booking lastBooking = bookings.stream()
+                .filter(booking -> booking.getStart().isBefore(now))
+                .max(Comparator.comparing(Booking::getEnd))
+                .orElse(null);
+
+        itemDto.setNextBooking(nextBooking != null ? ItemDto.ItemBooking.builder()
+                .id(nextBooking.getId())
+                .bookerId(nextBooking.getUser().getId())
+                .build() : null);
+        itemDto.setLastBooking(lastBooking != null ? ItemDto.ItemBooking.builder()
+                .id(lastBooking.getId())
+                .bookerId(lastBooking.getUser().getId())
+                .build() : null);
+
+        return itemDto;
+    }
+
+    private ItemDto addItemComments(ItemDto itemDto, List<Comment> comments) {
+
+        List<CommentDto> itemComments = comments.stream()
+                .filter(comment -> comment.getItem().getId().equals(itemDto.getId()))
+                .map(CommentMapper::toDto)
+                .collect(Collectors.toList());
+
+        itemDto.setComments(itemComments);
 
         return itemDto;
     }

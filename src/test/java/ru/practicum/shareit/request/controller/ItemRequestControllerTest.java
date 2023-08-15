@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -17,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,7 +47,7 @@ public class ItemRequestControllerTest {
                 responseDto2
         );
 
-        when(itemRequestService.getAllByRequesterId(eq(userId), anyInt(), anyInt())).thenReturn(responseDtoList);
+        when(itemRequestService.getAllByRequesterId(eq(userId), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", userId))
@@ -55,7 +55,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
 
-        verify(itemRequestService, times(1)).getAllByRequesterId(eq(userId), anyInt(), anyInt());
+        verify(itemRequestService, times(1)).getAllByRequesterId(eq(userId), any(Pageable.class));
         verifyNoMoreInteractions(itemRequestService);
     }
 
@@ -71,7 +71,7 @@ public class ItemRequestControllerTest {
                 responseDto2
         );
 
-        when(itemRequestService.getAll(eq(userId), anyInt(), anyInt())).thenReturn(responseDtoList);
+        when(itemRequestService.getAll(eq(userId), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", userId))
@@ -79,7 +79,7 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
 
-        verify(itemRequestService, times(1)).getAll(eq(userId), anyInt(), anyInt());
+        verify(itemRequestService, times(1)).getAll(eq(userId), any(Pageable.class));
         verifyNoMoreInteractions(itemRequestService);
     }
 

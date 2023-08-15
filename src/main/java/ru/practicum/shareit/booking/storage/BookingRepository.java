@@ -44,4 +44,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             + ":currentTime")
     Integer findCountAllApprovedByItemIdAndUserId(Long itemId, Long userId,
                                                   LocalDateTime currentTime);
+
+    @Query("select b from Booking as b where b.item.id in ?1 and b.status = 'APPROVED' and " +
+            "(b.start = (select min(bo.start) from Booking as bo where bo.start > current_timestamp) or " +
+            "b.end = (select max(bo.end) from Booking as bo where bo.end < current_timestamp or " +
+            "bo.end = current_timestamp or bo.start = current_timestamp )) " +
+            "order by b.start ")
+    List<Booking> findNearlyBookingByItemId(Long itemsId);
+
+    List<Booking> findAllByItemIdIn(List<Long> itemsId);
 }

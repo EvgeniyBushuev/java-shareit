@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.comment.CommentDto;
@@ -107,7 +108,7 @@ public class ItemControllerTest {
                 responseDto2
         );
 
-        when(itemService.getItemsByUserId(eq(userId), anyInt(), anyInt())).thenReturn(responseDtoList);
+        when(itemService.getItemsByUserId(eq(userId), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/items")
                         .header("X-Sharer-User-Id", userId))
@@ -115,7 +116,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
 
-        verify(itemService, times(1)).getItemsByUserId(eq(userId), anyInt(), anyInt());
+        verify(itemService, times(1)).getItemsByUserId(eq(userId), any());
         verifyNoMoreInteractions(itemService);
     }
 
@@ -129,7 +130,7 @@ public class ItemControllerTest {
                 responseDto2
         );
 
-        when(itemService.searchItemsForRent(anyString(), anyInt(), anyInt())).thenReturn(responseDtoList);
+        when(itemService.searchItemsForRent(anyString(), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/items/search")
                         .param("text", "text"))
@@ -137,7 +138,7 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
 
-        verify(itemService, times(1)).searchItemsForRent(eq("text"), anyInt(), anyInt());
+        verify(itemService, times(1)).searchItemsForRent(eq("text"), any(Pageable.class));
         verifyNoMoreInteractions(itemService);
     }
 
