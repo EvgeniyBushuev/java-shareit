@@ -18,8 +18,11 @@ import ru.practicum.shareit.user.storage.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
@@ -38,17 +41,43 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> requests = itemRequestRepository
                 .findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
 
-        List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
+        /*List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
                 .stream()
                 .map(ItemRequest::getId)
-                .collect(Collectors.toList()));
+                .collect(toList()));*/
+
+        Map<ItemRequest, List<Item>> itemByGroup = itemRepository.findAllByItemRequestIdIn(requests
+                        .stream()
+                        .map(ItemRequest::getId)
+                        .collect(toList()))
+                .stream()
+                .collect(groupingBy(Item::getItemRequest, toList()));
 
         List<ItemRequestGetResponseDto> responseItemRequests = new ArrayList<>();
 
-        for (ItemRequest request : requests) {
+        /*for (ItemRequest request : requests) {
             ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(request);
 
-            addItemsInformation(itemResponse, items);
+            //addItemsInformation(itemResponse, items);
+
+            responseItemRequests.add(itemResponse);
+        }*/
+
+        for (Map.Entry<ItemRequest, List<Item>> itemRequestListEntry : itemByGroup.entrySet()) {
+
+            ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(itemRequestListEntry.getKey());
+            itemResponse.setItems(itemRequestListEntry.getValue().isEmpty() ? new ArrayList<>() :
+                    itemRequestListEntry.getValue().stream()
+                            .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
+                                    .id(item.getId())
+                                    .name(item.getName())
+                                    .description(item.getDescription())
+                                    .available(item.getAvailable())
+                                    .requestId(item.getItemRequest().getId())
+                                    .build()
+                            )
+                            .collect(toList())
+            );
 
             responseItemRequests.add(itemResponse);
         }
@@ -63,7 +92,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable).stream()
                 .map(ItemRequestMapper::toGetResponseDto)
                 .map(this::addItemsInfo)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     @Override
@@ -103,17 +132,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                                 .name(item.getName())
                                 .description(item.getDescription())
                                 .available(item.getAvailable())
-                                .requestId(Math.toIntExact(item.getItemRequest().getId()))
+                                .requestId(item.getItemRequest().getId())
                                 .build()
                         )
-                        .collect(Collectors.toList())
+                        .collect(toList())
         );
 
         return itemRequestGetResponseDto;
     }
 
     private ItemRequestGetResponseDto addItemsInformation(ItemRequestGetResponseDto itemRequestGetResponseDto, List<Item> items) {
-       // List<Item> items = itemRepository.findAllByItemRequestId(itemRequestGetResponseDto.getId());
 
         itemRequestGetResponseDto.setItems(items.isEmpty() ? new ArrayList<>() :
                 items.stream()
@@ -122,10 +150,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                                 .name(item.getName())
                                 .description(item.getDescription())
                                 .available(item.getAvailable())
-                                .requestId(Math.toIntExact(item.getItemRequest().getId()))
+                                .requestId(item.getItemRequest().getId())
                                 .build()
                         )
-                        .collect(Collectors.toList())
+                        .collect(toList())
         );
 
         return itemRequestGetResponseDto;

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Data
 @Builder
@@ -13,5 +14,6 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class ItemRequestCreateDto {
     @NotBlank(message = "Описание не должно быть пустым")
+    @Size(max = 1024)
     private String description;
 }

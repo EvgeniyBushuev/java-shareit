@@ -15,6 +15,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
+import static ru.practicum.shareit.util.RequestHeader.sharer;
+
 @Validated
 @RestController
 @RequestMapping(path = "/requests")
@@ -24,9 +26,9 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @GetMapping
-    public List<ItemRequestGetResponseDto> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                           @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
-                                                           @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
+    public List<ItemRequestGetResponseDto> getAllByOwnerId(@RequestHeader(sharer) Long userId,
+                                                           @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                           @RequestParam(defaultValue = "20") @Min(1) int size) {
 
         Pageable pageable = PageRequest.of(from / size, size);
 
@@ -35,9 +37,9 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestGetResponseDto> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
-                                                  @RequestParam(required = false, defaultValue = "20") @Min(1) int size) {
+    public List<ItemRequestGetResponseDto> getAll(@RequestHeader(sharer) Long userId,
+                                                  @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                  @RequestParam(defaultValue = "20") @Min(1) int size) {
 
         Pageable pageable = PageRequest.of(from / size, size);
 
@@ -46,7 +48,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{itemRequestId}")
-    public ItemRequestGetResponseDto getById(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemRequestGetResponseDto getById(@RequestHeader(sharer) Long userId,
                                              @PathVariable Long itemRequestId) {
 
         log.info("Запрос от пользователя id {} заявки на вещь id {}", userId, itemRequestId);
@@ -54,7 +56,7 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestCreateResponseDto create(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public ItemRequestCreateResponseDto create(@RequestHeader(sharer) Long userId,
                                                @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
 
         log.info("Запрос от пользователя id {} на создание заявки", userId);
