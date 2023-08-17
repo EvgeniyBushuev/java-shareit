@@ -17,9 +17,7 @@ import ru.practicum.shareit.request.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserRepository;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -76,7 +74,7 @@ public class ItemRequestServiceTest {
 
         assertThat(resultDtoList.get(0).getId(), equalTo(itemRequest1.getId()));
         assertThat(resultDtoList.get(0).getDescription(), equalTo(itemRequest1.getDescription()));
-        assertThat(resultDtoList.get(0).getItems().size(), equalTo(1));
+        assertThat(resultDtoList.get(0).getItems().size(), equalTo(2));
         assertThat(resultDtoList.get(0).getItems().get(0).getId(), equalTo(item1.getId()));
         assertThat(resultDtoList.get(0).getItems().get(0).getName(), equalTo(item1.getName()));
         assertThat(resultDtoList.get(0).getItems().get(0).getDescription(), equalTo(item1.getDescription()));
@@ -85,12 +83,12 @@ public class ItemRequestServiceTest {
 
         assertThat(resultDtoList.get(1).getId(), equalTo(itemRequest2.getId()));
         assertThat(resultDtoList.get(1).getDescription(), equalTo(itemRequest2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().size(), equalTo(1));
-        assertThat(resultDtoList.get(1).getItems().get(0).getId(), equalTo(item2.getId()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getName(), equalTo(item2.getName()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getDescription(), equalTo(item2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getAvailable(), equalTo(item2.getAvailable()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11L));
+        assertThat(resultDtoList.get(1).getItems().size(), equalTo(2));
+        assertThat(resultDtoList.get(1).getItems().get(1).getId(), equalTo(item2.getId()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getName(), equalTo(item2.getName()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getDescription(), equalTo(item2.getDescription()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getAvailable(), equalTo(item2.getAvailable()));
+        assertThat(resultDtoList.get(1).getItems().get(1).getRequestId(), equalTo(11L));
 
         verify(userRepository, times(1)).findById(eq(requester.getId()));
         verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(eq(requester.getId()), any(Pageable.class));
@@ -100,8 +98,8 @@ public class ItemRequestServiceTest {
 
     @Test
     void getAllTest() {
-        User owner = getUser(1);
-        User requester = getUser(2);
+        User owner = getUser(1L);
+        User requester = getUser(2L);
 
         ItemRequest itemRequest1 = getItemRequest(10L);
         itemRequest1.setRequester(requester);
@@ -122,9 +120,12 @@ public class ItemRequestServiceTest {
                 itemRequest2
         );
 
+        Map<ItemRequest, List<Item>> itemByGroup = new HashMap<>();
+        itemByGroup.put(itemRequest1, List.of(item1));
+        itemByGroup.put(itemRequest2, List.of(item2));
+
         when(itemRequestRepository.findAllByRequesterIdNotOrderByCreatedDesc(eq(owner.getId()), any(Pageable.class))).thenReturn(itemRequestList);
-        when(itemRepository.findAllByItemRequestId(eq(itemRequest1.getId()))).thenReturn(Arrays.asList(item1));
-        when(itemRepository.findAllByItemRequestId(eq(itemRequest2.getId()))).thenReturn(Arrays.asList(item2));
+        when(itemRepository.findAllByItemRequestIdIn(eq(List.of(itemRequest1.getId(),itemRequest2.getId())))).thenReturn(Arrays.asList(item1, item2));
 
         Pageable pageable = PageRequest.of(0,10);
 
@@ -151,8 +152,7 @@ public class ItemRequestServiceTest {
         assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11L));
 
         verify(itemRequestRepository, times(1)).findAllByRequesterIdNotOrderByCreatedDesc(eq(owner.getId()), any(Pageable.class));
-        verify(itemRepository, times(1)).findAllByItemRequestId(itemRequest1.getId());
-        verify(itemRepository, times(1)).findAllByItemRequestId(itemRequest2.getId());
+        verify(itemRepository, times(1)).findAllByItemRequestIdIn(List.of(itemRequest1.getId(),itemRequest2.getId()));
         verifyNoMoreInteractions(itemRequestRepository, userRepository, itemRepository);
     }
 
