@@ -76,21 +76,21 @@ public class ItemRequestServiceTest {
 
         assertThat(resultDtoList.get(0).getId(), equalTo(itemRequest1.getId()));
         assertThat(resultDtoList.get(0).getDescription(), equalTo(itemRequest1.getDescription()));
-        assertThat(resultDtoList.get(0).getItems().size(), equalTo(2));
+        assertThat(resultDtoList.get(0).getItems().size(), equalTo(1));
         assertThat(resultDtoList.get(0).getItems().get(0).getId(), equalTo(item1.getId()));
         assertThat(resultDtoList.get(0).getItems().get(0).getName(), equalTo(item1.getName()));
         assertThat(resultDtoList.get(0).getItems().get(0).getDescription(), equalTo(item1.getDescription()));
         assertThat(resultDtoList.get(0).getItems().get(0).getAvailable(), equalTo(item1.getAvailable()));
-        assertThat(resultDtoList.get(0).getItems().get(0).getRequestId(), equalTo(10));
+        assertThat(resultDtoList.get(0).getItems().get(0).getRequestId(), equalTo(10L));
 
         assertThat(resultDtoList.get(1).getId(), equalTo(itemRequest2.getId()));
         assertThat(resultDtoList.get(1).getDescription(), equalTo(itemRequest2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().size(), equalTo(2));
-        assertThat(resultDtoList.get(1).getItems().get(1).getId(), equalTo(item2.getId()));
-        assertThat(resultDtoList.get(1).getItems().get(1).getName(), equalTo(item2.getName()));
-        assertThat(resultDtoList.get(1).getItems().get(1).getDescription(), equalTo(item2.getDescription()));
-        assertThat(resultDtoList.get(1).getItems().get(1).getAvailable(), equalTo(item2.getAvailable()));
-        assertThat(resultDtoList.get(1).getItems().get(1).getRequestId(), equalTo(11));
+        assertThat(resultDtoList.get(1).getItems().size(), equalTo(1));
+        assertThat(resultDtoList.get(1).getItems().get(0).getId(), equalTo(item2.getId()));
+        assertThat(resultDtoList.get(1).getItems().get(0).getName(), equalTo(item2.getName()));
+        assertThat(resultDtoList.get(1).getItems().get(0).getDescription(), equalTo(item2.getDescription()));
+        assertThat(resultDtoList.get(1).getItems().get(0).getAvailable(), equalTo(item2.getAvailable()));
+        assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11L));
 
         verify(userRepository, times(1)).findById(eq(requester.getId()));
         verify(itemRequestRepository, times(1)).findAllByRequesterIdOrderByCreatedDesc(eq(requester.getId()), any(Pageable.class));
@@ -139,7 +139,7 @@ public class ItemRequestServiceTest {
         assertThat(resultDtoList.get(0).getItems().get(0).getName(), equalTo(item1.getName()));
         assertThat(resultDtoList.get(0).getItems().get(0).getDescription(), equalTo(item1.getDescription()));
         assertThat(resultDtoList.get(0).getItems().get(0).getAvailable(), equalTo(item1.getAvailable()));
-        assertThat(resultDtoList.get(0).getItems().get(0).getRequestId(), equalTo(10));
+        assertThat(resultDtoList.get(0).getItems().get(0).getRequestId(), equalTo(10L));
 
         assertThat(resultDtoList.get(1).getId(), equalTo(itemRequest2.getId()));
         assertThat(resultDtoList.get(1).getDescription(), equalTo(itemRequest2.getDescription()));
@@ -148,7 +148,7 @@ public class ItemRequestServiceTest {
         assertThat(resultDtoList.get(1).getItems().get(0).getName(), equalTo(item2.getName()));
         assertThat(resultDtoList.get(1).getItems().get(0).getDescription(), equalTo(item2.getDescription()));
         assertThat(resultDtoList.get(1).getItems().get(0).getAvailable(), equalTo(item2.getAvailable()));
-        assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11));
+        assertThat(resultDtoList.get(1).getItems().get(0).getRequestId(), equalTo(11L));
 
         verify(itemRequestRepository, times(1)).findAllByRequesterIdNotOrderByCreatedDesc(eq(owner.getId()), any(Pageable.class));
         verify(itemRepository, times(1)).findAllByItemRequestId(itemRequest1.getId());
@@ -181,7 +181,7 @@ public class ItemRequestServiceTest {
         assertThat(resultDto.getItems().get(0).getName(), equalTo(item.getName()));
         assertThat(resultDto.getItems().get(0).getDescription(), equalTo(item.getDescription()));
         assertThat(resultDto.getItems().get(0).getAvailable(), equalTo(item.getAvailable()));
-        assertThat(resultDto.getItems().get(0).getRequestId(), equalTo(10));
+        assertThat(resultDto.getItems().get(0).getRequestId(), equalTo(10L));
 
         verify(userRepository, times(1)).findById(eq(requester.getId()));
         verify(itemRequestRepository, times(1)).findById(eq(itemRequest.getId()));
