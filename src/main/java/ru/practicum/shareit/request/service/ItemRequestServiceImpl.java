@@ -41,33 +41,46 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> requests = itemRequestRepository
                 .findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
 
-        /*List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
+        List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
                 .stream()
                 .map(ItemRequest::getId)
-                .collect(toList()));*/
+                .collect(toList()));
 
-        Map<ItemRequest, List<Item>> itemByGroup = itemRepository.findAllByItemRequestIdIn(requests
-                        .stream()
-                        .map(ItemRequest::getId)
-                        .collect(toList()))
-                .stream()
-                .collect(groupingBy(Item::getItemRequest, toList()));
 
         List<ItemRequestGetResponseDto> responseItemRequests = new ArrayList<>();
 
-        /*for (ItemRequest request : requests) {
+        for (ItemRequest request : requests) {
             ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(request);
 
-            //addItemsInformation(itemResponse, items);
+            addItemsInformation(itemResponse, items);
 
             responseItemRequests.add(itemResponse);
-        }*/
+        }
 
-        for (Map.Entry<ItemRequest, List<Item>> itemRequestListEntry : itemByGroup.entrySet()) {
+        return responseItemRequests;
+    }
 
-            ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(itemRequestListEntry.getKey());
-            itemResponse.setItems(itemRequestListEntry.getValue().isEmpty() ? new ArrayList<>() :
-                    itemRequestListEntry.getValue().stream()
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemRequestGetResponseDto> getAll(Long userId, Pageable pageable) {
+
+        List<Long> requestsIds = itemRequestRepository
+                .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable)
+                .stream()
+                .map(ItemRequest::getId)
+                .collect(toList());
+
+        Map<ItemRequest, List<Item>> itemByGroup = itemRepository.findAllByItemRequestIdIn(requestsIds)
+                .stream()
+                .collect(groupingBy(Item::getItemRequest, toList()));
+
+        List<ItemRequestGetResponseDto> responseDtoList = new ArrayList<>();
+
+        for (Map.Entry<ItemRequest, List<Item>> list : itemByGroup.entrySet()) {
+
+            ItemRequestGetResponseDto itemRequestGetResponseDto = ItemRequestMapper.toGetResponseDto(list.getKey());
+            itemRequestGetResponseDto.setItems(list.getValue().isEmpty() ? new ArrayList<>() :
+                    list.getValue().stream()
                             .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
                                     .id(item.getId())
                                     .name(item.getName())
@@ -79,20 +92,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                             .collect(toList())
             );
 
-            responseItemRequests.add(itemResponse);
+            responseDtoList.add(itemRequestGetResponseDto);
         }
 
-        return responseItemRequests;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ItemRequestGetResponseDto> getAll(Long userId, Pageable pageable) {
-        return itemRequestRepository
-                .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable).stream()
-                .map(ItemRequestMapper::toGetResponseDto)
-                .map(this::addItemsInfo)
-                .collect(toList());
+        return responseDtoList;
     }
 
     @Override
