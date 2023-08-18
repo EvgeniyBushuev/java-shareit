@@ -41,61 +41,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> requests = itemRequestRepository
                 .findAllByRequesterIdOrderByCreatedDesc(userId, pageable);
 
-        List<Item> items = itemRepository.findAllByItemRequestIdIn(requests
-                .stream()
-                .map(ItemRequest::getId)
-                .collect(toList()));
-
-
-        List<ItemRequestGetResponseDto> responseItemRequests = new ArrayList<>();
-
-        for (ItemRequest request : requests) {
-            ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(request);
-
-            addItemsInformation(itemResponse, items);
-
-            responseItemRequests.add(itemResponse);
-        }
-
-        return responseItemRequests;
+        return getResponseItemRequestList(requests);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ItemRequestGetResponseDto> getAll(Long userId, Pageable pageable) {
 
-        List<Long> requestsIds = itemRequestRepository
-                .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable)
-                .stream()
-                .map(ItemRequest::getId)
-                .collect(toList());
+        List<ItemRequest> requests = itemRequestRepository
+                .findAllByRequesterIdNotOrderByCreatedDesc(userId, pageable);
 
-        Map<ItemRequest, List<Item>> itemByGroup = itemRepository.findAllByItemRequestIdIn(requestsIds)
-                .stream()
-                .collect(groupingBy(Item::getItemRequest, toList()));
-
-        List<ItemRequestGetResponseDto> responseDtoList = new ArrayList<>();
-
-        for (Map.Entry<ItemRequest, List<Item>> list : itemByGroup.entrySet()) {
-
-            ItemRequestGetResponseDto itemRequestGetResponseDto = ItemRequestMapper.toGetResponseDto(list.getKey());
-            itemRequestGetResponseDto.setItems(list.getValue().isEmpty() ? new ArrayList<>() :
-                    list.getValue().stream()
-                            .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
-                                    .id(item.getId())
-                                    .name(item.getName())
-                                    .description(item.getDescription())
-                                    .available(item.getAvailable())
-                                    .requestId(item.getItemRequest().getId())
-                                    .build()
-                            )
-                            .collect(toList())
-            );
-
-            responseDtoList.add(itemRequestGetResponseDto);
-        }
-
-        return responseDtoList;
+        return getResponseItemRequestList(requests);
     }
 
     @Override
@@ -107,9 +63,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId)
                 .orElseThrow(() -> new NotFoundException("Некорректный идентификатор: " + itemRequestId));
-        ItemRequestGetResponseDto responseDto = ItemRequestMapper.toGetResponseDto(itemRequest);
-        responseDto = addItemsInfo(responseDto);
-        return responseDto;
+
+        return getResponseItemRequestList(List.of(itemRequest)).get(0);
     }
 
     @Override
@@ -125,40 +80,38 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return ItemRequestMapper.toCreateResponseDto(itemRequestRepository.save(itemRequest));
     }
 
-    private ItemRequestGetResponseDto addItemsInfo(ItemRequestGetResponseDto itemRequestGetResponseDto) {
-        List<Item> items = itemRepository.findAllByItemRequestId(itemRequestGetResponseDto.getId());
+    private List<ItemRequestGetResponseDto> getResponseItemRequestList(List<ItemRequest> requests) {
 
-        itemRequestGetResponseDto.setItems(items.isEmpty() ? new ArrayList<>() :
-                items.stream()
-                        .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
-                                .id(item.getId())
-                                .name(item.getName())
-                                .description(item.getDescription())
-                                .available(item.getAvailable())
-                                .requestId(item.getItemRequest().getId())
-                                .build()
-                        )
-                        .collect(toList())
-        );
+        List<ItemRequestGetResponseDto> responseItemRequests = new ArrayList<>();
 
-        return itemRequestGetResponseDto;
-    }
+        List<Long> requestsIds = requests
+                .stream()
+                .map(ItemRequest::getId)
+                .collect(toList());
 
-    private ItemRequestGetResponseDto addItemsInformation(ItemRequestGetResponseDto itemRequestGetResponseDto, List<Item> items) {
+        Map<ItemRequest, List<Item>> itemByGroup = itemRepository.findAllByItemRequestIdIn(requestsIds)
+                .stream()
+                .collect(groupingBy(Item::getItemRequest, toList()));
 
-        itemRequestGetResponseDto.setItems(items.isEmpty() ? new ArrayList<>() :
-                items.stream()
-                        .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
-                                .id(item.getId())
-                                .name(item.getName())
-                                .description(item.getDescription())
-                                .available(item.getAvailable())
-                                .requestId(item.getItemRequest().getId())
-                                .build()
-                        )
-                        .collect(toList())
-        );
+        for (ItemRequest request : requests) {
 
-        return itemRequestGetResponseDto;
+            ItemRequestGetResponseDto itemResponse = ItemRequestMapper.toGetResponseDto(request);
+
+            itemResponse.setItems(itemByGroup.get(request) == null ? new ArrayList<>() :
+                    itemByGroup.get(request).stream()
+                            .map(item -> ItemRequestGetResponseDto.RequestedItem.builder()
+                                    .id(item.getId())
+                                    .name(item.getName())
+                                    .description(item.getDescription())
+                                    .available(item.getAvailable())
+                                    .requestId(item.getItemRequest().getId())
+                                    .build()
+                            )
+                            .collect(toList())
+            );
+
+            responseItemRequests.add(itemResponse);
+        }
+        return responseItemRequests;
     }
 }
