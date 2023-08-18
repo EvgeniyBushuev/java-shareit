@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
-import static ru.practicum.shareit.util.RequestHeader.sharer;
+import static ru.practicum.shareit.util.RequestHeader.SHARER_USER_ID;
 
 @Validated
 @RestController
@@ -26,7 +26,7 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @GetMapping
-    public List<ItemRequestGetResponseDto> getAllByOwnerId(@RequestHeader(sharer) Long userId,
+    public List<ItemRequestGetResponseDto> getAllByOwnerId(@RequestHeader(SHARER_USER_ID) Long userId,
                                                            @RequestParam(defaultValue = "0") @Min(0) int from,
                                                            @RequestParam(defaultValue = "20") @Min(1) int size) {
 
@@ -37,7 +37,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public List<ItemRequestGetResponseDto> getAll(@RequestHeader(sharer) Long userId,
+    public List<ItemRequestGetResponseDto> getAll(@RequestHeader(SHARER_USER_ID) Long userId,
                                                   @RequestParam(defaultValue = "0") @Min(0) int from,
                                                   @RequestParam(defaultValue = "20") @Min(1) int size) {
 
@@ -48,7 +48,7 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{itemRequestId}")
-    public ItemRequestGetResponseDto getById(@RequestHeader(sharer) Long userId,
+    public ItemRequestGetResponseDto getById(@RequestHeader(SHARER_USER_ID) Long userId,
                                              @PathVariable Long itemRequestId) {
 
         log.info("Запрос от пользователя id {} заявки на вещь id {}", userId, itemRequestId);
@@ -56,7 +56,7 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestCreateResponseDto create(@RequestHeader(sharer) Long userId,
+    public ItemRequestCreateResponseDto create(@RequestHeader(SHARER_USER_ID) Long userId,
                                                @Valid @RequestBody ItemRequestCreateDto itemRequestCreateDto) {
 
         log.info("Запрос от пользователя id {} на создание заявки", userId);

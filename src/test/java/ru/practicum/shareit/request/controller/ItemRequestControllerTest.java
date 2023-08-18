@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.util.RequestHeader.SHARER_USER_ID;
 
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
@@ -50,7 +51,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getAllByRequesterId(eq(userId), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(SHARER_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
@@ -74,7 +75,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getAll(eq(userId), any(Pageable.class))).thenReturn(responseDtoList);
 
         mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(SHARER_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(responseDto1.getId()))
                 .andExpect(jsonPath("$[1].id").value(responseDto2.getId()));
@@ -92,7 +93,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.getById(eq(userId), eq(responseDto.getId()))).thenReturn(responseDto);
 
         mockMvc.perform(get("/requests/" + responseDto.getId())
-                        .header("X-Sharer-User-Id", userId))
+                        .header(SHARER_USER_ID, userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(responseDto.getId()));
 
@@ -113,7 +114,7 @@ public class ItemRequestControllerTest {
         when(itemRequestService.create(any(ItemRequestCreateDto.class), eq(userId))).thenReturn(responseDto);
 
         mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(SHARER_USER_ID, userId)
                         .content(objectMapper.writeValueAsString(requestDto))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)

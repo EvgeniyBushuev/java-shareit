@@ -13,7 +13,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
 
-import static ru.practicum.shareit.util.RequestHeader.sharer;
+import static ru.practicum.shareit.util.RequestHeader.SHARER_USER_ID;
 
 @RestController
 @RequestMapping("/items")
@@ -25,28 +25,28 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto,
-            @RequestHeader(sharer) Long userId) {
+            @RequestHeader(SHARER_USER_ID) Long userId) {
         log.info("Запрос на добавление новой вещи {} пользователем с id = {}", itemDto, userId);
         return itemService.addItem(itemDto, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@PathVariable Long itemId,
-            @RequestHeader(sharer) Long userId,
+            @RequestHeader(SHARER_USER_ID) Long userId,
             @RequestBody ItemDto itemDto) {
         log.info("Запрос на обновление вещи {}", itemDto);
         return itemService.updateItem(itemId, userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@RequestHeader(sharer) Long userId,
+    public ItemDto getById(@RequestHeader(SHARER_USER_ID) Long userId,
             @PathVariable Long itemId) {
         log.info("Запрос вещи ID: {}", itemId);
         return itemService.getItem(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllByOwnerId(@RequestHeader(sharer) Long userId,
+    public List<ItemDto> getAllByOwnerId(@RequestHeader(SHARER_USER_ID) Long userId,
                                          @RequestParam(defaultValue = "0") @Min(0) int from,
                                          @RequestParam(defaultValue = "20") @Min(1) int size) {
 
@@ -69,7 +69,7 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@PathVariable Long itemId,
-            @RequestHeader(sharer) Long userId,
+            @RequestHeader(SHARER_USER_ID) Long userId,
             @Valid @RequestBody CommentDto commentDto) {
         log.info("Запрос на создание комментария к вещи ID: {}, от пользователя ID: {} ",
                 itemId, userId);
