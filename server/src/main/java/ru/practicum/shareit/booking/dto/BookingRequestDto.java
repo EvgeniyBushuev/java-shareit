@@ -18,4 +18,5 @@ public class BookingRequestDto {
     }
 
     private Long itemId;
+
 }

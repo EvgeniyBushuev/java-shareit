@@ -14,13 +14,17 @@ public class BookingRequestDto {
     @NotNull
     @Future
     private LocalDateTime start;
+
     @NotNull
     @Future
     private LocalDateTime end;
+
     @AssertTrue
     private boolean isEndAfterStart() {
         return start == null || end == null || end.isAfter(start);
     }
+
     @NotNull
     private Long itemId;
+
 }
