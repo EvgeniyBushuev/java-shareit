@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request.service;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
 import ru.practicum.shareit.request.dto.ItemRequestCreateResponseDto;
 import ru.practicum.shareit.request.dto.ItemRequestGetResponseDto;
