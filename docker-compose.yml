@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgresql
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/postgres
 
   db:
     image: postgres:latest
