@@ -24,6 +24,7 @@ public class ItemController {
     public void delete(@PathVariable int itemId) {
         itemClient.delete(itemId);
     }
+
     @PostMapping
     public ResponseEntity<Object> addItem(@Valid @RequestBody ItemDto itemDto,
                                           @RequestHeader(SHARER_USER_ID) Long userId) {
