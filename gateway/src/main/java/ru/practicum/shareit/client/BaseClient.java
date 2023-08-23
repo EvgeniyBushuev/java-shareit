@@ -104,4 +104,16 @@ public class BaseClient {
 
         return responseBuilder.build();
     }
+
+    protected ResponseEntity<Object> delete(String path) {
+        return delete(path, null, null);
+    }
+
+    protected ResponseEntity<Object> delete(String path, Long userId) {
+        return delete(path, userId, null);
+    }
+
+    protected ResponseEntity<Object> delete(String path, Long userId, @Nullable Map<String, Object> parameters) {
+        return makeAndSendRequest(HttpMethod.DELETE, path, userId, parameters, null);
+    }
 }

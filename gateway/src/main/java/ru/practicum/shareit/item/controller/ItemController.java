@@ -20,6 +20,10 @@ import static ru.practicum.shareit.util.RequestHeader.SHARER_USER_ID;
 public class ItemController {
     private final ItemClient itemClient;
 
+    @DeleteMapping("/{itemId}")
+    public void delete(@PathVariable int itemId) {
+        itemClient.delete(itemId);
+    }
     @PostMapping
     public ResponseEntity<Object> addItem(@Valid @RequestBody ItemDto itemDto,
                                           @RequestHeader(SHARER_USER_ID) Long userId) {

@@ -41,4 +41,9 @@ public class UserController {
         log.info("Запрос на получение пользователя с  id = {}", userId);
         return userClient.getUserById(userId);
     }
+
+    @DeleteMapping("/{userId}")
+    public void delete(@PathVariable Long userId) {
+        userClient.delete(userId);
+    }
 }

@@ -40,6 +40,12 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRequestRepository itemRequestRepository;
 
     @Override
+    @Transactional
+    public void delete(Long itemId) {
+        itemRepository.deleteById(itemId);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public ItemDto getItem(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
