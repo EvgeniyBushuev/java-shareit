@@ -23,6 +23,7 @@ public class ItemController {
     public void delete(@PathVariable Long itemId) {
         itemService.delete(itemId);
     }
+
     @PostMapping
     public ItemDto addItem(@RequestBody ItemDto itemDto,
                            @RequestHeader(SHARER_USER_ID) Long userId) {
