@@ -40,7 +40,7 @@ public class BookingController {
         RequestBookingState requestBookingState = getStateParam(state);
 
         log.info("Запрос списка бронирований от пользователя ID: {}", userId);
-        return bookingClient.getAllByState(userId, requestBookingState, from, size);
+        return bookingClient.getAllByState(requestBookingState, userId, from, size);
     }
 
     @GetMapping("/owner")
@@ -52,7 +52,7 @@ public class BookingController {
         RequestBookingState requestBookingState = getStateParam(state);
 
         log.info("Запрос списка бронирований от владельца ID: {}", userId);
-        return bookingClient.getAllByStateForOwner(userId, requestBookingState, from, size);
+        return bookingClient.getAllByStateForOwner(requestBookingState, userId, from, size);
     }
 
     @PostMapping

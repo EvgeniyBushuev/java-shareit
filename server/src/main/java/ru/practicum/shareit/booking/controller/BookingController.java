@@ -33,13 +33,8 @@ public class BookingController {
                                                   @RequestParam(defaultValue = "0") int from,
                                                   @RequestParam(defaultValue = "20") int size,
                                                   @RequestHeader(SHARER_USER_ID) Long userId) {
-        RequestBookingState requestBookingState;
 
-        try {
-            requestBookingState = RequestBookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: " + state);
-        }
+        RequestBookingState requestBookingState = getStateParam(state);
 
         log.info("Запрос списка бронирований от пользователя ID: {}", userId);
         return bookingService.getAllByState(requestBookingState, userId, from, size);
@@ -51,13 +46,7 @@ public class BookingController {
                                                           @RequestParam(defaultValue = "20") int size,
                                                           @RequestHeader(SHARER_USER_ID) Long userId) {
 
-        RequestBookingState requestBookingState;
-
-        try {
-            requestBookingState = RequestBookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: " + state);
-        }
+        RequestBookingState requestBookingState = getStateParam(state);
 
         log.info("Запрос списка бронирований от владельца ID: {}", userId);
         return bookingService.getAllByStateForOwner(requestBookingState, userId, from, size);
@@ -78,5 +67,16 @@ public class BookingController {
 
         log.info("Запрос на подтверждение брони от пользователя ID: {}", userId);
         return bookingService.approve(bookingId, approved, userId);
+    }
+
+    private RequestBookingState getStateParam(String state) {
+
+        RequestBookingState requestBookingState;
+
+        try {
+            return  requestBookingState = RequestBookingState.valueOf(state.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Unknown state: " + state);
+        }
     }
 }

@@ -21,7 +21,7 @@ public class ItemController {
     private final ItemClient itemClient;
 
     @DeleteMapping("/{itemId}")
-    public void delete(@PathVariable int itemId) {
+    public void delete(@PathVariable Long itemId) {
         itemClient.delete(itemId);
     }
 

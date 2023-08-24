@@ -15,7 +15,7 @@ import java.util.Map;
 public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
-    public void delete(int itemId) {
+    public void delete(Long itemId) {
         delete("/" + itemId);
     }
 

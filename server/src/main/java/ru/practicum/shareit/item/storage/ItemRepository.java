@@ -17,7 +17,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "and i.available = true ")
     List<Item> findBySearchText(String searchText, Pageable pageable);
 
-    List<Item> findAllByItemRequestId(Long requestId);
-
     List<Item> findAllByItemRequestIdIn(List<Long> requestsId);
 }
