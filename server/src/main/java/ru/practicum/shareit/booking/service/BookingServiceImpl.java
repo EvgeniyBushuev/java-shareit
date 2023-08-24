@@ -57,7 +57,7 @@ public class BookingServiceImpl implements BookingService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        Pageable pageable = PageRequest.of(from/size, size );
+        Pageable pageable = PageRequest.of(from / size, size);
 
         switch (requestBookingState) {
             case ALL:
