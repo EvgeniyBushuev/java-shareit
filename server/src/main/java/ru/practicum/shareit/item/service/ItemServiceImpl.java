@@ -68,7 +68,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public List<ItemDto> getItemsByUserId(Long userId, int from, int size) {
 
-        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "userId"));
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"));
 
         List<Item> items = itemRepository.findAllByOwnerId(userId, pageable);
 
