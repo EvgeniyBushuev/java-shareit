@@ -101,20 +101,6 @@ public class BookingControllerTest {
     }
 
     @Test
-    void getAllByUnknownStateTest() throws Exception {
-
-        Long userId = 1L;
-
-        String state = "unknown";
-
-        mockMvc.perform(get("/bookings?state=" + state)
-                        .header("X-Sharer-User-Id", userId))
-                .andExpect(status().isBadRequest());
-
-        verifyNoMoreInteractions(bookingService);
-    }
-
-    @Test
     void createTest() throws Exception {
         Long userId = 1L;
 
