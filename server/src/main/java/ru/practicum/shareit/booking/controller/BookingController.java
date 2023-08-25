@@ -71,12 +71,6 @@ public class BookingController {
 
     private RequestBookingState getStateParam(String state) {
 
-        RequestBookingState requestBookingState;
-
-        try {
-            return  requestBookingState = RequestBookingState.valueOf(state.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: " + state);
-        }
+        return RequestBookingState.valueOf(state.toUpperCase());
     }
 }
